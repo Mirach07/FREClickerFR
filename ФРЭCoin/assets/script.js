@@ -1,6 +1,6 @@
 "use strict";
 
-let score = 1000;
+let score = 950;
 let pointsPerClick = 1;
 let pointsPerSecond = 0;
 
@@ -8,6 +8,7 @@ let clickMultiplierUpgradeCost = 50;
 let pointsPerSecondUpgradeCost = 100;
 
 let ksisSkinCost = 1000;
+let isKsisSkinOwned = false;
 
 let clickerImage = document.getElementById("clicker__image");
 let scoreCounter = document.getElementById("scoreCounter");
@@ -89,18 +90,26 @@ upgrades__autoClicker.onclick = () => {
     }
 };
 
+skinsFre.onclick = () => {
+    if(clickerImage.src !== "C:\FRVscodeThings\ФРЭCoin\assets\images\ФРЭ.PNG") {
+        changeSkinFre();
+    }
+}
 
 skinsKsis.onclick = () => {
-    if(ksisSkinCost <= score){
+    if(isKsisSkinOwned == true){
+        if(clickerImage.src == "C:\FRVscodeThings\ФРЭCoin\assets\images\ksis.png")
+            alert("You already using КСИС");
+        else
+            changeSkinKsis()
+    } else if(ksisSkinCost > 0 && ksisSkinCost <= score){
+        isKsisSkinOwned = true;
+
         changeSkinKsis();
         score -= ksisSkinCost;
         updateScore();
 
-        ksisSkinBuyButton.textContent = "Выбрано";
-
-        ksisSkinCost = 10000000;
-    } else if(clickerImage.src == "assets/images/ksis.png"){
-        alert("You already escaped ФРЭ");
+        ksisSkinCost = -100;
     } else{
         alert("You can't escape ФРЭ");
     }
@@ -134,6 +143,16 @@ function autoClicker() {
 
 function changeSkinKsis() {
     clickerImage.src = "assets/images/ksis.png";
+    ksisSkinBuyButton.textContent = "Выбрано";
+
+    freSkinBuyButton.textContent = "Выбрать";
+}
+
+function changeSkinFre() {
+    clickerImage.src = "assets/images/ФРЭ.PNG";
+    freSkinBuyButton.textContent = "Выбрано";
+
+    ksisSkinBuyButton.textContent = "Выбрать";
 }
 
 function checkAbilityToUpgrade() {
@@ -153,7 +172,7 @@ function checkAbilityToUpgrade() {
         upgrades__autoClicker.style.transform = "scale(1)";
     }
 
-    if(score >= ksisSkinCost){
+    if(ksisSkinCost > 0 && score >= ksisSkinCost){
         skinsKsis.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
         skinsKsis.style.transform = "scale(1.05)";
     } else{
