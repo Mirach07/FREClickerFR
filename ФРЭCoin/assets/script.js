@@ -1,34 +1,41 @@
 "use strict";
 
-let score = 950;
+let score = 1900;
 let pointsPerClick = 1;
 let pointsPerSecond = 0;
+let energy = 500;
+let maxEnergy = 500;
 
 let clickMultiplierUpgradeCost = 50;
 let pointsPerSecondUpgradeCost = 100;
+let maxEnergyUpgradeCost = 100;
 
 let ksisSkinCost = 1000;
 let isKsisSkinOwned = false;
+let iefSkinCost = 1000;
+let isIefSkinOwned = false;
 
 let clickerImage = document.getElementById("clicker__image");
 let scoreCounter = document.getElementById("scoreCounter");
 
-const ksisSkin = document.getElementById("skins__ksis");
-
 let ksisSkinBuyButton = document.getElementById("buy__buttonKsis");
 let freSkinBuyButton = document.getElementById("buy__buttonFre");
+let iefSkinBuyButton = document.getElementById("buy__buttonIef");
 
 const clickMultiplierLevel = document.getElementById("clickMultiplier");
 const autoClickerLevel = document.getElementById("pointsPerSecond");
+const maxEnergyLevel = document.getElementById("maxEnergy");
 
 const upgrades__clickMultiplier = document.getElementById("upgrades__clickMultiplier");
 const upgrades__autoClicker = document.getElementById("upgrades__autoClicker");
+const upgrades__maxEnergy = document.getElementById("upgrades__energy");
 
 const upgradeAutoClickerLevel = document.getElementById("pointsPerSecond__upgrade");
 const upgradeClickMultiplierLevel = document.getElementById("clickMultiplier__upgrade");
 
 const skinsFre = document.getElementById("skins__fre");
 const skinsKsis = document.getElementById("skins__ksis");
+const skinsIef = document.getElementById("skins__ief");
 
 
 
@@ -37,8 +44,14 @@ clickerImage.onmousedown = () => {
 };
 
 clickerImage.onmouseup = () => {
-    score += pointsPerClick;
-    scoreCounter.innerHTML = (score);
+    if(energy >= pointsPerClick) {
+        score += pointsPerClick;
+        scoreCounter.innerHTML = (score);
+
+        energy -= pointsPerClick;
+        updateEnergy();
+    }
+
     resetImageSize();
     checkAbilityToUpgrade();
 };
@@ -46,6 +59,7 @@ clickerImage.onmouseup = () => {
 
 
 setInterval(autoClicker, 1000);
+setInterval(energyGain, 1000);
 
 
 
@@ -90,6 +104,27 @@ upgrades__autoClicker.onclick = () => {
     }
 };
 
+upgrades__maxEnergy.onclick = () => {
+    if(maxEnergyUpgradeCost <= score){
+        maxEnergy *= 2;
+
+        score -= maxEnergyUpgradeCost;
+        updateScore();
+
+        maxEnergyUpgradeCost *= 1.5;
+        maxEnergyUpgradeCost = Math.trunc(maxEnergyUpgradeCost);
+
+        maxEnergyLevel.innerHTML = (maxEnergy);
+
+        document.getElementById("maxEnergyUpgradeCost").innerHTML = (Math.trunc(maxEnergyUpgradeCost));
+
+        checkAbilityToUpgrade();
+    
+    } else{
+        alert("А хомяк потапыч?");
+    }
+};
+
 skinsFre.onclick = () => {
     if(clickerImage.src !== "C:\FRVscodeThings\ФРЭCoin\assets\images\ФРЭ.PNG") {
         changeSkinFre();
@@ -115,6 +150,24 @@ skinsKsis.onclick = () => {
     }
 }
 
+skinsIef.onclick = () => {
+    if(isIefSkinOwned == true){
+        if(clickerImage.src == "C:\FRVscodeThings\ФРЭCoin\assets\images\ief.png")
+            alert("You already using ИЭФ");
+        else
+            changeSkinIef()
+    } else if(iefSkinCost > 0 && iefSkinCost <= score){
+        isIefSkinOwned = true;
+
+        changeSkinIef();
+        score -= iefSkinCost;
+        updateScore();
+
+        iefSkinCost = -100;
+    } else{
+        alert("You can't escape ФРЭ");
+    }
+}
 
 
 
@@ -123,6 +176,10 @@ skinsKsis.onclick = () => {
 
 function updateScore(){
     scoreCounter.innerHTML = (score);
+}
+
+function updateEnergy() {
+    document.getElementById("energyCounter").textContent = (energy);
 }
 
 function enlargeImage(){
@@ -141,18 +198,45 @@ function autoClicker() {
     checkAbilityToUpgrade();
 }
 
-function changeSkinKsis() {
-    clickerImage.src = "assets/images/ksis.png";
-    ksisSkinBuyButton.textContent = "Выбрано";
+function energyGain() {
+    if(energy < maxEnergy)
+        energy += maxEnergy / 500;
+    else
+        energy = maxEnergy;
 
-    freSkinBuyButton.textContent = "Выбрать";
+    updateEnergy();
+    console.log(energy);
 }
 
 function changeSkinFre() {
     clickerImage.src = "assets/images/ФРЭ.PNG";
     freSkinBuyButton.textContent = "Выбрано";
 
-    ksisSkinBuyButton.textContent = "Выбрать";
+    if(isKsisSkinOwned)
+        ksisSkinBuyButton.textContent = "Выбрать";
+
+    if(isIefSkinOwned)
+        iefSkinBuyButton.textContent = "Выбрать";
+}
+
+function changeSkinKsis() {
+    clickerImage.src = "assets/images/ksis.png";
+    ksisSkinBuyButton.textContent = "Выбрано";
+
+    freSkinBuyButton.textContent = "Выбрать";
+
+    if(isIefSkinOwned)
+        iefSkinBuyButton.textContent = "Выбрать";
+}
+
+function changeSkinIef() {
+    clickerImage.src = "assets/images/ief.png";
+    iefSkinBuyButton.textContent = "Выбрано";
+
+    freSkinBuyButton.textContent = "Выбрать";
+
+    if(isKsisSkinOwned)
+        ksisSkinBuyButton.textContent = "Выбрать";
 }
 
 function checkAbilityToUpgrade() {
@@ -172,6 +256,14 @@ function checkAbilityToUpgrade() {
         upgrades__autoClicker.style.transform = "scale(1)";
     }
 
+    if(score >= maxEnergyUpgradeCost){
+        upgrades__maxEnergy.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+        upgrades__maxEnergy.style.transform = "scale(1.05)";
+    } else{
+        upgrades__maxEnergy.style.backgroundColor = "rgba(0, 0, 0, 0.3)";
+        upgrades__maxEnergy.style.transform = "scale(1)";
+    }
+
     if(ksisSkinCost > 0 && score >= ksisSkinCost){
         skinsKsis.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
         skinsKsis.style.transform = "scale(1.05)";
@@ -180,5 +272,11 @@ function checkAbilityToUpgrade() {
         skinsKsis.style.transform = "scale(1)";
     }
 
-
+    if(iefSkinCost > 0 && score >= iefSkinCost){
+        skinsIef.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+        skinsIef.style.transform = "scale(1.05)";
+    } else{
+        skinsIef.style.backgroundColor = "rgba(0, 0, 0, 0.3)";
+        skinsIef.style.transform = "scale(1)";
+    }
 }
